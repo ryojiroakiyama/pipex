@@ -142,9 +142,21 @@ void next_section(char **av, char **envp)
 
 int	main(int ac, char **av, char **envp)
 {
+	int pid;
+	int	status;
+
 	if (ac != 5)
 		ft_exit("invalid number of arguments");
-	first_section(av, envp);
-	next_section(av, envp);
+	pid = fork();
+	if (pid == -1)
+		perrexit("fork");
+	else if (pid == 0)
+		first_section(av, envp);
+	else
+	{
+		if (wait(&status) == -1)
+			perrexit("wait");
+		next_section(av, envp);
+	}
 	return (0);
 }

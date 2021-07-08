@@ -6,7 +6,7 @@ HEADER = ./pipex.h
 
 LIBFT_DIR = ./libft
 
-LIBFT = ${LIBFT_DIR}/libft.a
+LIBFT = libf
 
 OBJS = ${SRCS:.c=.o}
 
@@ -16,13 +16,14 @@ CFLAGS = -Wall -Wextra -Werror -I ${LIBFT_DIR}
 
 RM = rm -f
 
-all: ${PIPEX}
-
-${PIPEX}: ${HEADER} ${OBJS} ${LIBFT}
-	${CC} ${CFLAGS} -o ${PIPEX} ${OBJS} -L ${LIBFT_DIR} -lft
+all: ${LIBFT}
+	@make ${PIPEX}
 
 ${LIBFT}:
 	${MAKE} -C ${LIBFT_DIR}
+
+${PIPEX}: ${HEADER} ${OBJS}
+	${CC} ${CFLAGS} -o ${PIPEX} ${OBJS} -L ${LIBFT_DIR} -lft
 
 clean:
 	${RM} ${OBJS}
