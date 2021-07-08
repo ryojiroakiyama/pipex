@@ -16,10 +16,9 @@ CFLAGS = -Wall -Wextra -Werror -I ${LIBFT_DIR}
 
 RM = rm -f
 
-all: ${LIBFT} ${PIPEX}
-
-${LIBFT}: ${LIBFT_DIR}
+all:
 	${MAKE} -C ${LIBFT_DIR}
+	@make ${PIPEX}
 
 ${PIPEX}: ${HEADER} ${OBJS} ${LIBFT}
 	${CC} ${CFLAGS} -o ${PIPEX} ${OBJS} -L ${LIBFT_DIR} -lft
