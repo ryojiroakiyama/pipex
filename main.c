@@ -75,8 +75,8 @@ char *get_path(char *command, char **envp)
 	path_list = ft_split((*envp) + 5, ':');
 	while (path_list[i])
 	{
-		tmp1 = ft_strjoin(path_list[i], "/");
-		tmp2 = ft_strjoin(tmp1, command);
+		tmp1 = ft_strjoin(path_list[i], "/");//if NULL
+		tmp2 = ft_strjoin(tmp1, command);//if NULL
 		free_1d_array(tmp1);
 		if (access(tmp2, F_OK | X_OK) == 0)
 		{
@@ -95,7 +95,7 @@ void set_command(char *av_command, char **envp)
 	g_command = ft_split(av_command, ' ');
 	g_path = NULL;
 	if (access(g_command[0], F_OK | X_OK) == 0)
-		g_path = ft_strdup(g_command[0]);
+		g_path = ft_strdup(g_command[0]);//if NULL
 	else
 	{
 		while (*envp && ft_strncmp(*envp, "PATH=", 5))
@@ -154,7 +154,7 @@ int	main(int ac, char **av, char **envp)
 		first_section(av, envp);
 	else
 	{
-		if (wait(&status) == -1)
+		if (wait(&status) == -1)//waitpid is more good?
 			perrexit("wait");
 		next_section(av, envp);
 	}
