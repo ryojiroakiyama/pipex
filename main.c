@@ -16,6 +16,8 @@ void free_2d_array(char **a)
 {
 	size_t i;
 
+	if (a == NULL)
+		return ;
 	i = 0;
 	while (a[i] != NULL)
 	{
@@ -23,6 +25,13 @@ void free_2d_array(char **a)
 		i++;
 	}
 	free(a);
+	a = NULL;
+}
+
+void free_1d_array(char *a)
+{
+	free(a);
+	a = NULL;
 }
 
 void put_2d_array(char **a)
@@ -42,12 +51,16 @@ void put_2d_array(char **a)
 void ft_exit(char *s)
 {
 	ft_putendl_fd(s, 2);
+	free_2d_array(g_command);
+	free_1d_array(g_path);
 	exit(1);
 }
 
 void perrexit(const char *s)
 {
 	perror(s);
+	free_2d_array(g_command);
+	free_1d_array(g_path);
 	exit(1);
 }
 
@@ -64,13 +77,13 @@ char *get_path(char *command, char **envp)
 	{
 		tmp1 = ft_strjoin(path_list[i], "/");
 		tmp2 = ft_strjoin(tmp1, command);
-		free(tmp1);
+		free_1d_array(tmp1);
 		if (access(tmp2, F_OK | X_OK) == 0)
 		{
 			free_2d_array(path_list);
 			return (tmp2);
 		}
-		free(tmp2);
+		free_1d_array(tmp2);
 		i++;
 	}
 	free_2d_array(path_list);
@@ -96,16 +109,42 @@ void set_command(char *av_command, char **envp)
 		ft_exit("no such file or permission denied");
 	}
 }
-		
+
+void first_section(char **av, char **envp)
+{
+	int infilefd;
+
+	set_command(av[2], envp);
+	infilefd = open(av[1], O_RDONLY);
+	if (infilefd == -1)
+		perrexit("open");
+	dup2(infilefd, 0);
+	execve(g_path, g_command, envp);
+	free_2d_array(g_command);
+	free_1d_array(g_path);
+	close(infilefd);
+}
+
+void next_section(char **av, char **envp)
+{
+	int outfilefd;
+
+	set_command(av[3], envp);
+	outfilefd = open(av[4], O_RDONLY | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
+	if (outfilefd == -1)
+		perrexit("open");
+	dup2(outfilefd, 1);
+	execve(g_path, g_command, envp);
+	free_2d_array(g_command);
+	free_1d_array(g_path);
+	close(outfilefd);
+}
+
 int	main(int ac, char **av, char **envp)
 {
-	(void)ac;
-//	if (ac != 5)
-//		ft_exit("invalid number of arguments");
-	set_command(av[1], envp);//challege with ls as av[1]
-	put_2d_array(g_command);
-	printf("%s\n", g_path);
-	free_2d_array(g_command);
-	free(g_path);
+	if (ac != 5)
+		ft_exit("invalid number of arguments");
+	first_section(av, envp);
+	next_section(av, envp);
 	return (0);
 }
