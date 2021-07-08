@@ -130,7 +130,7 @@ void next_section(char **av, char **envp)
 	int outfilefd;
 
 	set_command(av[3], envp);
-	outfilefd = open(av[4], O_RDONLY | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
+	outfilefd = open(av[4], O_RDWR | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
 	if (outfilefd == -1)
 		perrexit("open");
 	dup2(outfilefd, 1);
