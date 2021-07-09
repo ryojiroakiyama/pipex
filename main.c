@@ -4,18 +4,20 @@
 #define F_OK_X_OK 0
 #define F_OK_X_NO 126
 #define F_NO_X_NO 127
+#define READ 0
+#define WRITE 1
 
-char **g_command;
-char *g_path;
+char	**g_command;
+char	*g_path;
+int		g_pipefd[2];
 
-/*
 void end(void)__attribute__((destructor));
 
 void end(void)
 {
     system("leaks pipex");
 }
-*/
+
 void free_2d_array(char **array)
 {
 	size_t i;
@@ -64,6 +66,8 @@ void ft_exit(int status)
 		ft_putendl_fd("command not found", 2);
 	free_2d_array(g_command);
 	free_1d_array(g_path);
+	close(g_pipefd[READ]);
+	close(g_pipefd[WRITE]);
 	exit(status);
 }
 
@@ -72,6 +76,8 @@ void perrexit(const char *s, int status)
 	perror(s);
 	free_2d_array(g_command);
 	free_1d_array(g_path);
+	close(g_pipefd[READ]);
+	close(g_pipefd[WRITE]);
 	exit(status);
 }
 
@@ -134,7 +140,6 @@ void set_command(char *av_command, char **envp)
 	int status;
 
 	g_command = verify_2d_array(ft_split(av_command, ' '), EXIT_FAILURE);
-	g_path = NULL;
 	status = verify_access(g_command[0]);
 	if (status == F_OK_X_OK)
 		g_path = verify_1d_array(ft_strdup(g_command[0]), NULL, NULL, EXIT_FAILURE);
@@ -156,12 +161,16 @@ void first_section(char **av, char **envp)
 	set_command(av[2], envp);
 	infilefd = open(av[1], O_RDONLY);
 	if (infilefd == -1)
-		perrexit("open", 1);
-	dup2(infilefd, 0);
-	execve(g_path, g_command, envp);
-	free_2d_array(g_command);
-	free_1d_array(g_path);
+		perrexit("open", EXIT_FAILURE);
+	if (dup2(infilefd, STDIN_FILENO) == -1)
+		perrexit("dup2", EXIT_FAILURE);
 	close(infilefd);
+	close(g_pipefd[READ]);
+	if (dup2(g_pipefd[WRITE], STDOUT_FILENO) == -1)
+		perrexit("dup2", EXIT_FAILURE);
+	close(g_pipefd[WRITE]);
+	if (execve(g_path, g_command, envp) == -1)
+		perrexit("execve", EXIT_FAILURE);
 }
 
 void next_section(char **av, char **envp)
@@ -171,12 +180,16 @@ void next_section(char **av, char **envp)
 	set_command(av[3], envp);
 	outfilefd = open(av[4], O_RDWR | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
 	if (outfilefd == -1)
-		perrexit("open", 1);
-	dup2(outfilefd, 1);
-	execve(g_path, g_command, envp);
-	free_2d_array(g_command);
-	free_1d_array(g_path);
+		perrexit("open", EXIT_FAILURE);
+	close(g_pipefd[WRITE]);
+	if (dup2(g_pipefd[READ], STDIN_FILENO) == -1)
+		perrexit("dup2", EXIT_FAILURE);
+	close(g_pipefd[READ]);
+	if (dup2(outfilefd, STDOUT_FILENO) == -1)
+		perrexit("dup2", EXIT_FAILURE);
 	close(outfilefd);
+	if (execve(g_path, g_command, envp) == -1)
+		perrexit("execve", EXIT_FAILURE);
 }
 
 int	main(int ac, char **av, char **envp)
@@ -184,21 +197,25 @@ int	main(int ac, char **av, char **envp)
 	int pid;
 	int	status;
 
+	g_command = NULL;
+	g_path = NULL;
 	if (ac != 5)
 		ft_exit(INVALID_ARGC);
+	if (pipe(g_pipefd) == -1)
+		perrexit("pipe", EXIT_FAILURE);
 	pid = fork();
 	if (pid == -1)
-		perrexit("fork", 1);
+		perrexit("fork", EXIT_FAILURE);
 	else if (pid == 0)
 		first_section(av, envp);
 	else
 	{
 		if (wait(&status) == -1)
-			perrexit("wait", 1);
+			perrexit("wait", EXIT_FAILURE);
 		if (WEXITSTATUS(status) == 0)
 			next_section(av, envp);
 		else
-			exit(1);
+			exit(WEXITSTATUS(status));
 	}
 	return (0);
 }
