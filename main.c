@@ -1,5 +1,10 @@
 #include "./pipex.h"
 
+#define INVALID_ARGC 1
+#define F_OK_X_OK 0
+#define F_OK_X_NO 126
+#define F_NO_X_NO 127
+
 char **g_command;
 char *g_path;
 
@@ -49,81 +54,99 @@ void put_2d_array(char **a)
 	}
 }
 
-void ft_exit(char *s)
+void ft_exit(int status)
 {
-	ft_putendl_fd(s, 2);
+	if (status == INVALID_ARGC)
+		ft_putendl_fd("invalid number of arguments", 2);
+	if (status == F_OK_X_NO)
+		ft_putendl_fd("command : permission denied", 2);
+	if (status == F_NO_X_NO)
+		ft_putendl_fd("command not found", 2);
 	free_2d_array(g_command);
 	free_1d_array(g_path);
-	exit(1);
+	exit(status);
 }
 
-void perrexit(const char *s)
+void perrexit(const char *s, int status)
 {
 	perror(s);
 	free_2d_array(g_command);
 	free_1d_array(g_path);
-	exit(1);
+	exit(status);
 }
 
-char *verify_1d_array(char *array, char *to_free1, char **to_free2)
+char *verify_1d_array(char *array, char *to_free1, char **to_free2, int status)
 {
 	if (!array)
 	{
 		free_1d_array(to_free1);
 		free_2d_array(to_free2);
-		perrexit("malloc");
+		perrexit("malloc", status);
 	}
 	return (array);
 }
 
-char **verify_2d_array(char **array)
+char **verify_2d_array(char **array, int status)
 {
 	if (!array)
-		perrexit("malloc");
+		perrexit("malloc", status);
 	return (array);
 }
 
-char *get_path(char *command, char **envp)
+int verify_access(char *file)
+{
+	if (access(file, X_OK) == 0)
+		return (F_OK_X_OK);
+	if (access(file, F_OK) == 0)
+		return (F_OK_X_NO);
+	return (F_NO_X_NO);
+}
+
+int get_path(char *command, char **envp, int status)
 {
 	size_t	i;
-	char	*tmp1;
-	char	*tmp2;
+	char	*tmp;
 	char	**path_list;
 
 	i = 0;
-	path_list = verify_2d_array(ft_split((*envp) + 5, ':'));
+	path_list = verify_2d_array(ft_split((*envp) + 5, ':'), EXIT_FAILURE);
 	while (path_list[i])
 	{
-		tmp1 = verify_1d_array(ft_strjoin(path_list[i], "/"), NULL, path_list);
-		tmp2 = verify_1d_array(ft_strjoin(tmp1, command), tmp1, path_list);
-		free_1d_array(tmp1);
-		if (access(tmp2, F_OK | X_OK) == 0)
+		tmp = verify_1d_array(ft_strjoin(path_list[i], "/"), NULL, path_list, EXIT_FAILURE);
+		g_path = verify_1d_array(ft_strjoin(tmp, command), tmp, path_list, EXIT_FAILURE);
+		free_1d_array(tmp);
+		status = verify_access(g_path);
+		if (status == F_OK_X_OK)
 		{
 			free_2d_array(path_list);
-			return (tmp2);
+			return (status);
 		}
-		free_1d_array(tmp2);
+		free_1d_array(g_path);
+		g_path = NULL;
 		i++;
 	}
 	free_2d_array(path_list);
-	return (NULL);
+	return (status);
 }
 
 void set_command(char *av_command, char **envp)
 {
-	g_command = verify_2d_array(ft_split(av_command, ' '));
+	int status;
+
+	g_command = verify_2d_array(ft_split(av_command, ' '), EXIT_FAILURE);
 	g_path = NULL;
-	if (access(g_command[0], F_OK | X_OK) == 0)
-		g_path = verify_1d_array(ft_strdup(g_command[0]), NULL, NULL);
-	else
+	status = verify_access(g_command[0]);
+	if (status == F_OK_X_OK)
+		g_path = verify_1d_array(ft_strdup(g_command[0]), NULL, NULL, EXIT_FAILURE);
+	else if (status != F_OK_X_NO)
 	{
 		while (*envp && ft_strncmp(*envp, "PATH=", 5))
 			envp++;
 		if (*envp != NULL)
-			g_path = get_path(g_command[0], envp);
+			status = get_path(g_command[0], envp, status);
 	}
-	if (g_path == NULL)
-		ft_exit("no such file or permission denied");
+	if (status != F_OK_X_OK)
+		ft_exit(status);
 }
 
 void first_section(char **av, char **envp)
@@ -133,7 +156,7 @@ void first_section(char **av, char **envp)
 	set_command(av[2], envp);
 	infilefd = open(av[1], O_RDONLY);
 	if (infilefd == -1)
-		perrexit("open");
+		perrexit("open", 1);
 	dup2(infilefd, 0);
 	execve(g_path, g_command, envp);
 	free_2d_array(g_command);
@@ -148,7 +171,7 @@ void next_section(char **av, char **envp)
 	set_command(av[3], envp);
 	outfilefd = open(av[4], O_RDWR | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
 	if (outfilefd == -1)
-		perrexit("open");
+		perrexit("open", 1);
 	dup2(outfilefd, 1);
 	execve(g_path, g_command, envp);
 	free_2d_array(g_command);
@@ -162,16 +185,16 @@ int	main(int ac, char **av, char **envp)
 	int	status;
 
 	if (ac != 5)
-		ft_exit("invalid number of arguments");
+		ft_exit(INVALID_ARGC);
 	pid = fork();
 	if (pid == -1)
-		perrexit("fork");
+		perrexit("fork", 1);
 	else if (pid == 0)
 		first_section(av, envp);
 	else
 	{
 		if (wait(&status) == -1)
-			perrexit("wait");
+			perrexit("wait", 1);
 		if (WEXITSTATUS(status) == 0)
 			next_section(av, envp);
 		else

@@ -1,8 +1,1 @@
-Makefile
-infile
-libft
-main.c
-main.o
-outfile
-pipex
-pipex.h
+tmpfile
