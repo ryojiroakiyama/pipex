@@ -66,8 +66,6 @@ void ft_exit(int status)
 		ft_putendl_fd("command not found", 2);
 	free_2d_array(g_command);
 	free_1d_array(g_path);
-	close(g_pipefd[READ]);
-	close(g_pipefd[WRITE]);
 	exit(status);
 }
 
@@ -76,8 +74,6 @@ void perrexit(const char *s, int status)
 	perror(s);
 	free_2d_array(g_command);
 	free_1d_array(g_path);
-	close(g_pipefd[READ]);
-	close(g_pipefd[WRITE]);
 	exit(status);
 }
 
