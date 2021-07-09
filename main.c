@@ -12,26 +12,28 @@ void end(void)
 }
 
 
-void free_2d_array(char **a)
+void free_2d_array(char **array)
 {
 	size_t i;
 
-	if (a == NULL)
+	if (array == NULL)
 		return ;
 	i = 0;
-	while (a[i] != NULL)
+	while (array[i] != NULL)
 	{
-		free(a[i]);
+		free(array[i]);
 		i++;
 	}
-	free(a);
-	a = NULL;
+	free(array);
+	array = NULL;
 }
 
-void free_1d_array(char *a)
+void free_1d_array(char *array)
 {
-	free(a);
-	a = NULL;
+	if (array == NULL)
+		return ;
+	free(array);
+	array = NULL;
 }
 
 void put_2d_array(char **a)
@@ -64,6 +66,24 @@ void perrexit(const char *s)
 	exit(1);
 }
 
+char *verify_1d_array(char *array, char *to_free1, char **to_free2)
+{
+	if (!array)
+	{
+		free_1d_array(to_free1);
+		free_2d_array(to_free2);
+		perrexit("malloc");
+	}
+	return (array);
+}
+
+char **verify_2d_array(char **array)
+{
+	if (!array)
+		perrexit("malloc");
+	return (array);
+}
+
 char *get_path(char *command, char **envp)
 {
 	size_t	i;
@@ -72,11 +92,11 @@ char *get_path(char *command, char **envp)
 	char	**path_list;
 
 	i = 0;
-	path_list = ft_split((*envp) + 5, ':');
+	path_list = verify_2d_array(ft_split((*envp) + 5, ':'));
 	while (path_list[i])
 	{
-		tmp1 = ft_strjoin(path_list[i], "/");//if NULL
-		tmp2 = ft_strjoin(tmp1, command);//if NULL
+		tmp1 = verify_1d_array(ft_strjoin(path_list[i], "/"), NULL, path_list);
+		tmp2 = verify_1d_array(ft_strjoin(tmp1, command), tmp1, path_list);
 		free_1d_array(tmp1);
 		if (access(tmp2, F_OK | X_OK) == 0)
 		{
@@ -92,10 +112,10 @@ char *get_path(char *command, char **envp)
 
 void set_command(char *av_command, char **envp)
 {
-	g_command = ft_split(av_command, ' ');
+	g_command = verify_2d_array(ft_split(av_command, ' '));
 	g_path = NULL;
 	if (access(g_command[0], F_OK | X_OK) == 0)
-		g_path = ft_strdup(g_command[0]);//if NULL
+		g_path = verify_1d_array(ft_strdup(g_command[0]), NULL, NULL);
 	else
 	{
 		while (*envp && ft_strncmp(*envp, "PATH=", 5))
@@ -104,10 +124,7 @@ void set_command(char *av_command, char **envp)
 			g_path = get_path(g_command[0], envp);
 	}
 	if (g_path == NULL)
-	{
-		free_2d_array(g_command);
 		ft_exit("no such file or permission denied");
-	}
 }
 
 void first_section(char **av, char **envp)
