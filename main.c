@@ -3,15 +3,14 @@
 char **g_command;
 char *g_path;
 
-
+/*
 void end(void)__attribute__((destructor));
 
 void end(void)
 {
     system("leaks pipex");
 }
-
-
+*/
 void free_2d_array(char **array)
 {
 	size_t i;
@@ -171,9 +170,12 @@ int	main(int ac, char **av, char **envp)
 		first_section(av, envp);
 	else
 	{
-		if (wait(&status) == -1)//waitpid is more good?
+		if (wait(&status) == -1)
 			perrexit("wait");
-		next_section(av, envp);
+		if (WEXITSTATUS(status) == 0)
+			next_section(av, envp);
+		else
+			exit(1);
 	}
 	return (0);
 }
