@@ -123,12 +123,8 @@ int get_path(char *command, char **envp, int status)
 		free_1d_array(tmp);
 		status = verify_access(g_path);
 		if (status == F_OK_X_OK)
-		{
-			free_2d_array(path_list);
-			return (status);
-		}
+			break ;
 		free_1d_array(g_path);
-		g_path = NULL;
 		i++;
 	}
 	free_2d_array(path_list);
