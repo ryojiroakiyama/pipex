@@ -111,17 +111,20 @@ int verify_access(char *file)
 int get_path(char *command, char **envp, int status)
 {
 	size_t	i;
-	char	*tmp;
 	char	**path_list;
+	char	*add_slash;
+	int		new_status;
 
 	i = 0;
 	path_list = verify_2d_array(ft_split((*envp) + 5, ':'), EXIT_FAILURE);
 	while (path_list[i])
 	{
-		tmp = verify_1d_array(ft_strjoin(path_list[i], "/"), NULL, path_list, EXIT_FAILURE);
-		g_path = verify_1d_array(ft_strjoin(tmp, command), tmp, path_list, EXIT_FAILURE);
-		free_1d_array(tmp);
-		status = verify_access(g_path);
+		add_slash = verify_1d_array(ft_strjoin(path_list[i], "/"), NULL, path_list, EXIT_FAILURE);
+		g_path = verify_1d_array(ft_strjoin(add_slash, command), add_slash, path_list, EXIT_FAILURE);
+		free_1d_array(add_slash);
+		new_status = verify_access(g_path);
+		if (new_status != F_NO_X_NO)
+			status = new_status;
 		if (status == F_OK_X_OK)
 			break ;
 		free_1d_array(g_path);
@@ -139,7 +142,7 @@ void set_command(char *av_command, char **envp)
 	status = verify_access(g_command[0]);
 	if (status == F_OK_X_OK)
 		g_path = verify_1d_array(ft_strdup(g_command[0]), NULL, NULL, EXIT_FAILURE);
-	else if (status != F_OK_X_NO)
+	else
 	{
 		while (*envp && ft_strncmp(*envp, "PATH=", 5))
 			envp++;
