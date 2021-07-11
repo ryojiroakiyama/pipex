@@ -1,11 +1,9 @@
-this is a infile$
-this is a infile$
-this is a infile$
-this is a infile$
-this is a infile$
-this is a infile$
-this is a infile$
-this is a infile$
-this is a infile$
-this is a infile$
-this is a infile$
+total 168
+-rw-r--r--   1 ryojiroakiyama  staff    489 Jul  8 23:41 Makefile
+-rw-------   1 ryojiroakiyama  staff    187 Jul  9 22:06 infile
+drwxr-xr-x@ 82 ryojiroakiyama  staff   2624 Jul 11 20:39 libft
+-rw-r--r--   1 ryojiroakiyama  staff   4149 Jul 11 20:39 main.c
+-rw-r--r--   1 ryojiroakiyama  staff   5880 Jul 11 20:39 main.o
+-rw-------   1 ryojiroakiyama  staff      1 Jul 11 20:40 outfile
+-rwxr-xr-x   1 ryojiroakiyama  staff  51176 Jul 11 20:39 pipex
+-rw-r--r--   1 ryojiroakiyama  staff    366 Jul 11 20:29 pipex.h

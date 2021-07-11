@@ -1,26 +1,8 @@
 #include "./pipex.h"
 
-#define INVALID_ARGC 1
-#define F_OK_X_OK 0
-#define F_OK_X_NO 126
-#define F_NO_X_NO 127
-#define READ 0
-#define WRITE 1
-
-char	**g_command;
-char	*g_path;
-int		g_pipefd[2];
-
-void end(void)__attribute__((destructor));
-
-void end(void)
+void	free_2d_array(char **array)
 {
-    system("leaks pipex");
-}
-
-void free_2d_array(char **array)
-{
-	size_t i;
+	size_t	i;
 
 	if (array == NULL)
 		return ;
@@ -34,7 +16,7 @@ void free_2d_array(char **array)
 	array = NULL;
 }
 
-void free_1d_array(char *array)
+void	free_1d_array(char *array)
 {
 	if (array == NULL)
 		return ;
@@ -42,7 +24,7 @@ void free_1d_array(char *array)
 	array = NULL;
 }
 
-void put_2d_array(char **a)
+void	put_2d_array(char **a)
 {
 	if (a == NULL)
 	{
@@ -56,7 +38,7 @@ void put_2d_array(char **a)
 	}
 }
 
-void ft_exit(int status)
+void	ft_exit(int status)
 {
 	if (status == INVALID_ARGC)
 		ft_putendl_fd("invalid number of arguments", 2);
@@ -71,7 +53,7 @@ void ft_exit(int status)
 	exit(status);
 }
 
-void perrexit(const char *s, int status)
+void	perrexit(const char *s, int status)
 {
 	perror(s);
 	free_2d_array(g_command);
@@ -81,7 +63,8 @@ void perrexit(const char *s, int status)
 	exit(status);
 }
 
-char *verify_1d_array(char *array, char *to_free1, char **to_free2, int status)
+char	*verify_1d_array(char *array, char *to_free1, \
+							char **to_free2, int status)
 {
 	if (!array)
 	{
@@ -92,14 +75,14 @@ char *verify_1d_array(char *array, char *to_free1, char **to_free2, int status)
 	return (array);
 }
 
-char **verify_2d_array(char **array, int status)
+char	**verify_2d_array(char **array, int status)
 {
 	if (!array)
 		perrexit("malloc", status);
 	return (array);
 }
 
-int verify_access(char *file)
+int	verify_access(char *file)
 {
 	if (access(file, X_OK) == 0)
 		return (F_OK_X_OK);
@@ -108,7 +91,7 @@ int verify_access(char *file)
 	return (F_NO_X_NO);
 }
 
-int get_path(char *command, char **envp, int status)
+int	get_path(char *command, char **envp, int status)
 {
 	size_t	i;
 	char	**path_list;
@@ -119,8 +102,10 @@ int get_path(char *command, char **envp, int status)
 	path_list = verify_2d_array(ft_split((*envp) + 5, ':'), EXIT_FAILURE);
 	while (path_list[i])
 	{
-		add_slash = verify_1d_array(ft_strjoin(path_list[i], "/"), NULL, path_list, EXIT_FAILURE);
-		g_path = verify_1d_array(ft_strjoin(add_slash, command), add_slash, path_list, EXIT_FAILURE);
+		add_slash = verify_1d_array(ft_strjoin(path_list[i], "/"), \
+										NULL, path_list, EXIT_FAILURE);
+		g_path = verify_1d_array(ft_strjoin(add_slash, command), \
+										add_slash, path_list, EXIT_FAILURE);
 		free_1d_array(add_slash);
 		new_status = verify_access(g_path);
 		if (new_status != F_NO_X_NO)
@@ -134,14 +119,15 @@ int get_path(char *command, char **envp, int status)
 	return (status);
 }
 
-void set_command(char *av_command, char **envp)
+void	set_command(char *av_command, char **envp)
 {
-	int status;
+	int	status;
 
 	g_command = verify_2d_array(ft_split(av_command, ' '), EXIT_FAILURE);
 	status = verify_access(g_command[0]);
 	if (status == F_OK_X_OK)
-		g_path = verify_1d_array(ft_strdup(g_command[0]), NULL, NULL, EXIT_FAILURE);
+		g_path = verify_1d_array(ft_strdup(g_command[0]), \
+											NULL, NULL, EXIT_FAILURE);
 	else
 	{
 		while (*envp && ft_strncmp(*envp, "PATH=", 5))
@@ -153,9 +139,9 @@ void set_command(char *av_command, char **envp)
 		ft_exit(status);
 }
 
-void first_section(char **av, char **envp)
+void	first_section(char **av, char **envp)
 {
-	int infilefd;
+	int	infilefd;
 
 	set_command(av[2], envp);
 	infilefd = open(av[1], O_RDONLY);
@@ -172,9 +158,9 @@ void first_section(char **av, char **envp)
 		perrexit("execve", EXIT_FAILURE);
 }
 
-void next_section(char **av, char **envp)
+void	next_section(char **av, char **envp)
 {
-	int outfilefd;
+	int	outfilefd;
 
 	set_command(av[3], envp);
 	outfilefd = open(av[4], O_RDWR | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
@@ -193,7 +179,7 @@ void next_section(char **av, char **envp)
 
 int	main(int ac, char **av, char **envp)
 {
-	int pid;
+	int	pid;
 	int	status;
 
 	g_command = NULL;
