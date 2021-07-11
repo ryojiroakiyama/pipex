@@ -24,20 +24,6 @@ void	free_1d_array(char *array)
 	array = NULL;
 }
 
-void	put_2d_array(char **a)
-{
-	if (a == NULL)
-	{
-		printf("array is NULL");
-		return ;
-	}
-	while (*a != NULL)
-	{
-		printf("%s\n", *a);
-		a++;
-	}
-}
-
 void	ft_exit(int status)
 {
 	if (status == INVALID_ARGC)
