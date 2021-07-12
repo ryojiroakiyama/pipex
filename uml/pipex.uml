@@ -1,0 +1,107 @@
+@startuml
+
+class main{
+	pipe_fd[0]->READ
+	pipe_fd[1]->WRITE
+	pid = fnork()
+}
+
+class child_process{
+	set command
+	dup2(infile_fd, stdin)
+	dup2(pipe_fd[WRITE], stdout)
+	execve(command)
+}
+
+class parent_process{
+	set command
+	dup2(pipe_fd[READ], stdin)
+	dup2(outfile_fd, stdout)
+	execve(command)
+}
+
+circle stdin_child
+
+circle stdout_child
+
+circle stdin_parent
+
+circle stdout_parent
+
+circle outfile_fd
+
+circle infile_fd
+
+circle pipe_fd_write
+
+circle pipe_fd_read
+
+circle pipe_fd_write_child
+
+circle pipe_fd_read_parent
+
+package outfile <<Folder>> {
+}
+
+package infile <<Folder>> {
+}
+
+package pipe_buff <<Folder>> {
+}
+
+package pipe_buff_c <<Folder>> {
+}
+
+package pipe_buff_p <<Folder>> {
+}
+
+main --> parent_process
+parent_process --> child_process
+
+main -- pipe_buff
+
+child_process -- infile
+child_process -- pipe_buff_c
+
+parent_process -- pipe_buff_p
+parent_process -- outfile
+
+
+pipe_fd_write --|> pipe_buff
+pipe_fd_read --|> pipe_buff
+
+
+stdin_child --|> infile
+infile_fd --|> infile
+
+pipe_fd_write_child --|> pipe_buff_c
+stdout_child --|> pipe_buff_c
+
+pipe_fd_read_parent --|> pipe_buff_p
+stdin_parent --|> pipe_buff_p
+
+stdout_parent --|> outfile
+outfile_fd --|> outfile
+
+@enduml
+
+
+	check the numbers of arguments
+	==
+	folk
+	parent process wait
+	pretreate
+	child process excute command
+	->pipe excute command to parent process
+	->if error -> eixt and catch and print error message from strerror
+
+class pretreate{
+	==
+	find the command in the environment variables(notice the NULL case)
+	..
+	if file of command exist -> excute
+	else
+		get PATH strings and split to list
+		starjoin all PATH list with argv(not option)
+		find flie of command
+}
