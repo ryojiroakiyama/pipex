@@ -1,8 +1,8 @@
 PIPEX = pipex
 
-SRCS = ./main.c
+SRCS = ./srcs/main.c ./srcs/prepare_command.c ./srcs/free_exit_funcs.c
 
-HEADER = ./pipex.h
+HEADER = ./includes
 
 LIBFT_DIR = ./libft
 
@@ -12,7 +12,7 @@ OBJS = ${SRCS:.c=.o}
 
 CC = gcc
 
-CFLAGS = -Wall -Wextra -Werror -I ${LIBFT_DIR}
+CFLAGS = -Wall -Wextra -Werror -I ${LIBFT_DIR} -I ${HEADER}
 
 RM = rm -f
 

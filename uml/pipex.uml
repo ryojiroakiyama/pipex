@@ -56,7 +56,7 @@ package pipe_buff_p <<Folder>> {
 }
 
 main --> parent_process
-parent_process --> child_process
+parent_process .. child_process
 
 main -- pipe_buff
 
