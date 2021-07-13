@@ -61,7 +61,10 @@ int	main(int ac, char **av, char **envp)
 		if (WEXITSTATUS(status) == 0)
 			next_section(av, envp);
 		else
+		{
+			printf("-----------------------exit\n");//
 			exit(WEXITSTATUS(status));
+		}
 	}
 	return (0);
 }

@@ -1,7 +1,7 @@
 #include "pipex.h"
 
-char	*verify_1d_array(char *array, char *to_free1, \
-							char **to_free2, int status)
+char	*verify_1d_array(char *array, char **to_free1, \
+							char ***to_free2, int status)
 {
 	if (!array)
 	{
@@ -40,19 +40,19 @@ int	get_path(char *command, char **envp, int status)
 	while (path_list[i])
 	{
 		add_slash = verify_1d_array(ft_strjoin(path_list[i], "/"), \
-										NULL, path_list, EXIT_FAILURE);
+										NULL, &path_list, EXIT_FAILURE);
 		g_path = verify_1d_array(ft_strjoin(add_slash, command), \
-										add_slash, path_list, EXIT_FAILURE);
-		free_1d_array(add_slash);
+										&add_slash, &path_list, EXIT_FAILURE);
+		free_1d_array(&add_slash);
 		new_status = verify_access(g_path);
 		if (new_status != F_NO_X_NO)
 			status = new_status;
 		if (status == F_OK_X_OK)
 			break ;
-		free_1d_array(g_path);
+		free_1d_array(&g_path);
 		i++;
 	}
-	free_2d_array(path_list);
+	free_2d_array(&path_list);
 	return (status);
 }
 
