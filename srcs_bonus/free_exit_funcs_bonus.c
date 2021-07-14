@@ -35,8 +35,6 @@ void	ft_exit(int status)
 	free_2d_array(&g_path_list);
 	free_2d_array(&g_cmd);
 	free_1d_array(&g_cmd_path);
-	close(g_pipefd[READ]);
-	close(g_pipefd[WRITE]);
 	exit(status);
 }
 
@@ -46,7 +44,5 @@ void	perrexit(const char *s, int status)
 	free_2d_array(&g_path_list);
 	free_2d_array(&g_cmd);
 	free_1d_array(&g_cmd_path);
-	close(g_pipefd[READ]);
-	close(g_pipefd[WRITE]);
 	exit(status);
 }

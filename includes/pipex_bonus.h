@@ -12,13 +12,25 @@
 # define F_OK_X_OK 0
 # define F_OK_X_NO 126
 # define F_NO_X_NO 127
-# define READ 0
-# define WRITE 1
+
+enum e_pipefd
+{
+	READ,
+	WRITE,
+	PIPEFD_NUM
+};
+
+enum e_index
+{
+	NOW,
+	STOP,
+	HERE_DOC,
+	INDEX_NUM
+};
 
 char	**g_path_list;
 char	**g_cmd;
 char	*g_cmd_path;
-int		g_pipefd[2];
 
 void	first_section(char **av, char **envp);
 void	next_section(char **av, char **envp);
