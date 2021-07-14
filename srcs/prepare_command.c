@@ -1,5 +1,5 @@
 #include "pipex.h"
-
+/*
 char	*verify_1d_array(char *array, char **to_free1, \
 							char ***to_free2, int status)
 {
@@ -18,7 +18,7 @@ char	**verify_2d_array(char **array, int status)
 		perrexit("malloc", status);
 	return (array);
 }
-
+*/
 int	verify_access(char *file)
 {
 	if (access(file, X_OK) == 0)
@@ -28,50 +28,44 @@ int	verify_access(char *file)
 	return (F_NO_X_NO);
 }
 
-int	get_path(char *command, char **envp, int status)
+int	get_cmd_path(char *cmd, int status)
 {
 	size_t	i;
-	char	**path_list;
-	char	*add_slash;
 	int		new_status;
 
 	i = 0;
-	path_list = verify_2d_array(ft_split((*envp) + 5, ':'), EXIT_FAILURE);
-	while (path_list[i])
+	while (g_path_list && g_path_list[i])
 	{
-		add_slash = verify_1d_array(ft_strjoin(path_list[i], "/"), \
-										NULL, &path_list, EXIT_FAILURE);
-		g_path = verify_1d_array(ft_strjoin(add_slash, command), \
-										&add_slash, &path_list, EXIT_FAILURE);
-		free_1d_array(&add_slash);
-		new_status = verify_access(g_path);
+		g_cmd_path = ft_strjoin(g_path_list[i], cmd);
+		if (!g_cmd_path)
+			perrexit("malloc", EXIT_FAILURE);
+		new_status = verify_access(g_cmd_path);
 		if (new_status != F_NO_X_NO)
 			status = new_status;
 		if (status == F_OK_X_OK)
 			break ;
-		free_1d_array(&g_path);
+		free_1d_array(&g_cmd_path);
 		i++;
 	}
-	free_2d_array(&path_list);
 	return (status);
 }
 
-void	set_command(char *av_command, char **envp)
+void	set_cmd_cmdpath(char *av_cmd)
 {
 	int	status;
 
-	g_command = verify_2d_array(ft_split(av_command, ' '), EXIT_FAILURE);
-	status = verify_access(g_command[0]);
+	g_cmd = ft_split(av_cmd, ' ');
+	if (!g_cmd)
+		perrexit("malloc", EXIT_FAILURE);
+	status = verify_access(g_cmd[0]);
 	if (status == F_OK_X_OK)
-		g_path = verify_1d_array(ft_strdup(g_command[0]), \
-											NULL, NULL, EXIT_FAILURE);
-	else
 	{
-		while (*envp && ft_strncmp(*envp, "PATH=", 5))
-			envp++;
-		if (*envp != NULL)
-			status = get_path(g_command[0], envp, status);
+		g_cmd_path = ft_strdup(g_cmd[0]);
+		if (!g_cmd_path)
+			perrexit("malloc", EXIT_FAILURE);
 	}
+	else
+		status = get_cmd_path(g_cmd[0], status);
 	if (status != F_OK_X_OK)
 		ft_exit(status);
 }

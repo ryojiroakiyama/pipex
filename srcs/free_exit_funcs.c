@@ -32,19 +32,21 @@ void	ft_exit(int status)
 		ft_putendl_fd("command : permission denied", 2);
 	if (status == F_NO_X_NO)
 		ft_putendl_fd("command not found", 2);
-	free_2d_array(&g_command);
-	free_1d_array(&g_path);
-	close(g_pipefd[READ]);
-	close(g_pipefd[WRITE]);
+	free_2d_array(&g_path_list);
+	free_2d_array(&g_cmd);
+	free_1d_array(&g_cmd_path);
+//	close(g_pipefd[READ]);
+//	close(g_pipefd[WRITE]);
 	exit(status);
 }
 
 void	perrexit(const char *s, int status)
 {
 	perror(s);
-	free_2d_array(&g_command);
-	free_1d_array(&g_path);
-	close(g_pipefd[READ]);
-	close(g_pipefd[WRITE]);
+	free_2d_array(&g_path_list);
+	free_2d_array(&g_cmd);
+	free_1d_array(&g_cmd_path);
+//	close(g_pipefd[READ]);
+//	close(g_pipefd[WRITE]);
 	exit(status);
 }

@@ -4,7 +4,7 @@ void	first_section(char **av, char **envp)
 {
 	int	infilefd;
 
-	set_command(av[2], envp);
+	set_cmd_cmdpath(av[2]);
 	infilefd = open(av[1], O_RDONLY);
 	if (infilefd == -1)
 		perrexit("open", EXIT_FAILURE);
@@ -15,7 +15,7 @@ void	first_section(char **av, char **envp)
 	if (dup2(g_pipefd[WRITE], STDOUT_FILENO) == -1)
 		perrexit("dup2", EXIT_FAILURE);
 	close(g_pipefd[WRITE]);
-	if (execve(g_path, g_command, envp) == -1)
+	if (execve(g_cmd_path, g_cmd, envp) == -1)
 		perrexit("execve", EXIT_FAILURE);
 }
 
@@ -23,7 +23,7 @@ void	next_section(char **av, char **envp)
 {
 	int	outfilefd;
 
-	set_command(av[3], envp);
+	set_cmd_cmdpath(av[3]);
 	outfilefd = open(av[4], O_RDWR | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
 	if (outfilefd == -1)
 		perrexit("open", EXIT_FAILURE);
@@ -34,8 +34,32 @@ void	next_section(char **av, char **envp)
 	if (dup2(outfilefd, STDOUT_FILENO) == -1)
 		perrexit("dup2", EXIT_FAILURE);
 	close(outfilefd);
-	if (execve(g_path, g_command, envp) == -1)
+	if (execve(g_cmd_path, g_cmd, envp) == -1)
 		perrexit("execve", EXIT_FAILURE);
+}
+
+void	set_path_list(char **envp)
+{
+	size_t	i;
+	char	*tmp;
+
+	while (*envp && ft_strncmp(*envp, "PATH=", 5))
+		envp++;
+	if (*envp == NULL)
+		return ;
+	g_path_list = ft_split((*envp) + 5, ':');
+	if (!g_path_list)
+		perrexit("malloc", EXIT_FAILURE);
+	i = 0;
+	while (g_path_list[i])
+	{
+		tmp = g_path_list[i];
+		g_path_list[i] = ft_strjoin(g_path_list[i], "/");
+		free(tmp);
+		if (!g_path_list[i])
+			perrexit("malloc", EXIT_FAILURE);
+		i++;
+	}
 }
 
 int	main(int ac, char **av, char **envp)
@@ -43,10 +67,9 @@ int	main(int ac, char **av, char **envp)
 	int	pid;
 	int	status;
 
-	g_command = NULL;
-	g_path = NULL;
 	if (ac != 5)
 		ft_exit(INVALID_ARGC);
+	set_path_list(envp);
 	if (pipe(g_pipefd) == -1)
 		perrexit("pipe", EXIT_FAILURE);
 	pid = fork();
@@ -58,13 +81,7 @@ int	main(int ac, char **av, char **envp)
 	{
 		if (wait(&status) == -1)
 			perrexit("wait", EXIT_FAILURE);
-		if (WEXITSTATUS(status) == 0)
-			next_section(av, envp);
-		else
-		{
-			printf("-----------------------exit\n");//
-			exit(WEXITSTATUS(status));
-		}
+		next_section(av, envp);
 	}
 	return (0);
 }
