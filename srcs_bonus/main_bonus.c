@@ -62,17 +62,30 @@ void	set_path_list(char **envp)
 	}
 }
 
-
-void	parent_process(int *status, int pid, int *pipefd)
+void	child_process(char **av, char **envp, int *index)
 {
-	if (wait(status) == -1)
-		perrexit("wait", EXIT_FAILURE);
-	close(pipefd[READ]);
-	dup2(pipefd[WRITE], STDIN_FILENO);
-	close(pipefd[WRITE]);
+	if (index[HERE_DOC])
+		here_doc_run();
+	else if (index[NOW] == index[START])
+		first_run();
+	else if (index[START] < index[NOW] && index[NOW] < index[STOP])
+		middle_run();
+	else if (index[NOW] == index[STOP])
+		last_run();
+	else
+		perrexit("index not meet the conditions", EXIT_FAILURE);
 }
 
-int	parent_and_child(char **av, char **envp, int *index)
+void	parent_process(int *status, int *pipefd)
+{
+	if (waitipid(status) == -1)
+		perrexit("wait", EXIT_FAILURE);
+	close(pipefd[WRITE]);
+	dup2(pipefd[READ], STDIN_FILENO);
+	close(pipefd[READ]);
+}
+
+int	execute_loop(char **av, char **envp, int *index)
 {
 	int	pid;
 	int	status;
@@ -80,7 +93,7 @@ int	parent_and_child(char **av, char **envp, int *index)
 
 	while (index[NOW] <= index[STOP])
 	{
-		if (pipe(g_pipefd) == -1)
+		if (pipe(pipefd) == -1)
 			perrexit("pipe", EXIT_FAILURE);
 		pid = fork();
 		if (pid == -1)
@@ -88,7 +101,7 @@ int	parent_and_child(char **av, char **envp, int *index)
 		if (pid == 0)
 			child_process(av, envp, index, pipefd);
 		else
-			parent_process(&status, pid, pipefd);
+			parent_process(&status, pipefd);
 		index[NOW]++;
 	}
 	return (WEXITSTATUS(status));
@@ -103,18 +116,18 @@ int	main(int ac, char **av, char **envp)
 		ft_exit(INVALID_ARGC);
 	if (ft_strncmp(av[1], "here_doc", 10))
 	{
-		index[NOW] = 2;
-		index[STOP] = ac - 2;
+		index[START] = 2;
 		index[HERE_DOC] = 0;
 	}
 	else
 	{
-		index[NOW] = 3;
-		index[STOP] = ac - 2;
+		index[START] = 3;
 		index[HERE_DOC] = 1;
 	}
+	index[STOP] = ac - 2;
+	index[NOW] = index[START];
 	set_path_list(envp);
-	last_status = parent_and_child(av, envp, index);
+	last_status = execute_loop(av, envp, index);
 	free_2d_array(&g_path_list);
 	free_2d_array(&g_cmd);
 	free_1d_array(&g_cmd_path);

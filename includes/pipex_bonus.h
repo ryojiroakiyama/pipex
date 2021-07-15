@@ -22,8 +22,9 @@ enum e_pipefd
 
 enum e_index
 {
-	NOW,
+	START,
 	STOP,
+	NOW,
 	HERE_DOC,
 	INDEX_NUM
 };
