@@ -26,8 +26,28 @@ void	set_path_list(char **envp)
 
 void	here_doc_run(char **av, char **envp, int *index, int *pipefd)
 {
-	
-	return ;
+	int		status;
+	char 	*line;
+	char	*limiter;
+
+	close(pipefd[READ]);
+	limiter = av[index[NOW - 1]];
+	while (1)//if over byte?
+	{
+		status = get_next_line(0, &line);
+		if (ft_strncmp(line, limiter, ft_strlen(limiter) + 1)
+			break ;
+		if (status == 1)
+			ft_putendl_fd(line, pipefd[WRITE]);
+		if (status == 0)
+			ft_putstr_fd(line, pipefd[WRITE]);
+		free(line);
+		if (status == -1)
+			perrexit("malloc", EXIT_FAILURE);
+	}
+	free(line);
+	get_next_line(0, &line);
+	close(pipefd[WRITE]);
 }
 
 void	first_run(char **av, char **envp, int *index, int *pipefd)
