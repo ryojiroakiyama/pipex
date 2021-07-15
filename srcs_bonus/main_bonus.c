@@ -1,43 +1,5 @@
 #include "pipex.h"
 
-void	first_section(char **av, char **envp)
-{
-	int	infilefd;
-
-	set_cmd_cmdpath(av[2]);
-	infilefd = open(av[1], O_RDONLY);
-	if (infilefd == -1)
-		perrexit("open", EXIT_FAILURE);
-	if (dup2(infilefd, STDIN_FILENO) == -1)
-		perrexit("dup2", EXIT_FAILURE);
-	close(infilefd);
-	close(g_pipefd[READ]);
-	if (dup2(g_pipefd[WRITE], STDOUT_FILENO) == -1)
-		perrexit("dup2", EXIT_FAILURE);
-	close(g_pipefd[WRITE]);
-	if (execve(g_cmd_path, g_cmd, envp) == -1)
-		perrexit("execve", EXIT_FAILURE);
-}
-
-void	next_section(char **av, char **envp)
-{
-	int	outfilefd;
-
-	set_cmd_cmdpath(av[3]);
-	outfilefd = open(av[4], O_RDWR | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
-	if (outfilefd == -1)
-		perrexit("open", EXIT_FAILURE);
-	close(g_pipefd[WRITE]);
-	if (dup2(g_pipefd[READ], STDIN_FILENO) == -1)
-		perrexit("dup2", EXIT_FAILURE);
-	close(g_pipefd[READ]);
-	if (dup2(outfilefd, STDOUT_FILENO) == -1)
-		perrexit("dup2", EXIT_FAILURE);
-	close(outfilefd);
-	if (execve(g_cmd_path, g_cmd, envp) == -1)
-		perrexit("execve", EXIT_FAILURE);
-}
-
 void	set_path_list(char **envp)
 {
 	size_t	i;
@@ -62,16 +24,70 @@ void	set_path_list(char **envp)
 	}
 }
 
-void	child_process(char **av, char **envp, int *index)
+void	here_doc_run(char **av, char **envp, int *index, int *pipefd)
+{
+	return ;
+}
+
+void	first_run(char **av, char **envp, int *index, int *pipefd)
+{
+	int	infilefd;
+
+	set_cmd_cmdpath(av[index[NOW]]);
+	infilefd = open(av[index[NOW - 1]], O_RDONLY);
+	if (infilefd == -1)
+		perrexit("open", EXIT_FAILURE);
+	if (dup2(infilefd, STDIN_FILENO) == -1)
+		perrexit("dup2", EXIT_FAILURE);
+	close(infilefd);
+	close(pipefd[READ]);
+	if (dup2(pipefd[WRITE], STDOUT_FILENO) == -1)
+		perrexit("dup2", EXIT_FAILURE);
+	close(pipefd[WRITE]);
+	if (execve(g_cmd_path, g_cmd, envp) == -1)
+		perrexit("execve", EXIT_FAILURE);
+}
+
+void	middle_run(char **av, char **envp, int *index, int *pipefd)
+{
+	set_cmd_cmdpath(av[index[NOW]]);
+	close(pipefd[READ]);
+	if (dup2(pipefd[WRITE], STDOUT_FILENO) == -1)
+		perrexit("dup2", EXIT_FAILURE);
+	close(pipefd[WRITE]);
+	if (execve(g_cmd_path, g_cmd, envp) == -1)
+		perrexit("execve", EXIT_FAILURE);
+}
+
+void	last_run(char **av, char **envp, int *index, int *pipefd)
+{
+	int	outfilefd;
+
+	set_cmd_cmdpath(av[NOW]);
+	close(pipefd[WRITE]);
+	if (dup2(pipefd[READ], STDIN_FILENO) == -1)
+		perrexit("dup2", EXIT_FAILURE);
+	close(pipefd[READ]);
+	outfilefd = open(av[NOW + 1], O_RDWR | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
+	if (outfilefd == -1)
+		perrexit("open", EXIT_FAILURE);
+	if (dup2(outfilefd, STDOUT_FILENO) == -1)
+		perrexit("dup2", EXIT_FAILURE);
+	close(outfilefd);
+	if (execve(g_cmd_path, g_cmd, envp) == -1)
+		perrexit("execve", EXIT_FAILURE);
+}
+
+void	child_processes(char **av, char **envp, int *index, int *pipefd)
 {
 	if (index[HERE_DOC])
-		here_doc_run();
+		here_doc_run(av, envp, index, pipefd);
 	else if (index[NOW] == index[START])
-		first_run();
+		first_run(av, envp, index, pipefd);
 	else if (index[START] < index[NOW] && index[NOW] < index[STOP])
-		middle_run();
+		middle_run(av, envp, index, pipefd);
 	else if (index[NOW] == index[STOP])
-		last_run();
+		last_run(av, envp, index, pipefd);
 	else
 		perrexit("index not meet the conditions", EXIT_FAILURE);
 }
