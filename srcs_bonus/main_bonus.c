@@ -69,7 +69,10 @@ void	last_run(char **av, char **envp, int *index, int *pipefd)
 	if (dup2(pipefd[READ], STDIN_FILENO) == -1)
 		perrexit("dup2", EXIT_FAILURE);
 	close(pipefd[READ]);
-	outfilefd = open(av[NOW + 1], O_RDWR | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
+	if (index[HERE_DOC])
+		outfilefd = open(av[now + 1], O_RDWR | O_APPEND | O_CREAT, S_IREAD | S_IWRITE);
+	else
+		outfilefd = open(av[now + 1], O_RDWR | O_TRUNC | O_CREAT, S_IREAD | S_IWRITE);
 	if (outfilefd == -1)
 		perrexit("open", EXIT_FAILURE);
 	if (dup2(outfilefd, STDOUT_FILENO) == -1)
@@ -81,16 +84,19 @@ void	last_run(char **av, char **envp, int *index, int *pipefd)
 
 void	child_processes(char **av, char **envp, int *index, int *pipefd)
 {
-	if (index[HERE_DOC])
-		here_doc_run(av, envp, index, pipefd);
-	else if (index[NOW] == index[START])
-		first_run(av, envp, index, pipefd);
+	if (index[NOW] == index[START])
+	{
+		if (index[HERE_DOC])
+			here_doc_run(av, envp, index, pipefd);
+		else
+			first_run(av, envp, index, pipefd);
+	}
 	else if (index[START] < index[NOW] && index[NOW] < index[STOP])
 		middle_run(av, envp, index, pipefd);
 	else if (index[NOW] == index[STOP])
 		last_run(av, envp, index, pipefd);
 	else
-		perrexit("index not meet the conditions", EXIT_FAILURE);
+		perrexit("index does not meet the conditions", EXIT_FAILURE);
 }
 
 void	parent_process(int *status, int *pipefd)
