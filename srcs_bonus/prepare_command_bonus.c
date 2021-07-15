@@ -1,4 +1,4 @@
-#include "pipex.h"
+#include "pipex_bonus.h"
 /*
 char	*verify_1d_array(char *array, char **to_free1, \
 							char ***to_free2, int status)

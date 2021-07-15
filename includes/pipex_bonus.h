@@ -32,12 +32,12 @@ enum e_index
 char	**g_path_list;
 char	**g_cmd;
 char	*g_cmd_path;
-
+/*
 void	first_section(char **av, char **envp);
 void	next_section(char **av, char **envp);
 void	set_path_list(char **envp);
 int		main(int ac, char **av, char **envp);
-/*
+
 char	*verify_1d_array(char *array, char **to_free1, \
 							char ***to_free2, int status);
 char	**verify_2d_array(char **array, int status);
@@ -50,5 +50,6 @@ void	free_2d_array(char ***array);
 void	free_1d_array(char **array);
 void	ft_exit(int status);
 void	perrexit(const char *s, int status);
+int		get_next_line(int fd, char **line);
 
 #endif
