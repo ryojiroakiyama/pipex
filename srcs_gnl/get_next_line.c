@@ -19,14 +19,14 @@ int	by_stock(char **stock, char **line)
 
 	if (!(*stock))
 		return (-42);
-	nl = ft_strchr(*stock, '\n');
+	nl = gnl_strchr(*stock, '\n');
 	if (nl != -1)
 	{
 		*line = ft_subnstr(*stock, 0, nl);
 		if (!(*line))
 			return (ft_free(stock));
 		tmp = *stock;
-		*stock = ft_subnstr(*stock, nl + 1, ft_strlen(*stock) - 1 - nl);
+		*stock = ft_subnstr(*stock, nl + 1, gnl_strlen(*stock) - 1 - nl);
 		free(tmp);
 		if (!(*stock))
 			return (ft_free(line));
@@ -69,7 +69,7 @@ ssize_t	by_buff(char **buff, char **line, char **stock, ssize_t rc)
 	if (rc == 0)
 		return (0);
 	(*buff)[rc] = '\0';
-	nl = ft_strchr(*buff, '\n');
+	nl = gnl_strchr(*buff, '\n');
 	if (nl != -1)
 	{
 		tmp = *line;
@@ -77,13 +77,13 @@ ssize_t	by_buff(char **buff, char **line, char **stock, ssize_t rc)
 		free(tmp);
 		if (!(*line))
 			return (-1);
-		*stock = ft_strnjoin(0, *buff + nl + 1, ft_strlen(*buff) - 1 - nl);
+		*stock = ft_strnjoin(0, *buff + nl + 1, gnl_strlen(*buff) - 1 - nl);
 		if (!(*stock))
 			return (ft_free(line));
 		return (1);
 	}
 	tmp = *line;
-	*line = ft_strnjoin(*line, *buff, ft_strlen(*buff));
+	*line = ft_strnjoin(*line, *buff, gnl_strlen(*buff));
 	free(tmp);
 	if (!(*line))
 		return (-1);

@@ -24,18 +24,18 @@ void	set_path_list(char **envp)
 	}
 }
 
-void	here_doc_run(char **av, char **envp, int *index, int *pipefd)
+void	child_heredoc(char **av, int *index, int *pipefd)
 {
 	int		status;
 	char 	*line;
 	char	*limiter;
 
 	close(pipefd[READ]);
-	limiter = av[index[NOW - 1]];
+	limiter = av[index[NOW] - 1];
 	while (1)//if over byte?
 	{
 		status = get_next_line(0, &line);
-		if (ft_strncmp(line, limiter, ft_strlen(limiter) + 1)
+		if (ft_strncmp(line, limiter, ft_strlen(limiter) + 1) == 0)
 			break ;
 		if (status == 1)
 			ft_putendl_fd(line, pipefd[WRITE]);
@@ -46,16 +46,16 @@ void	here_doc_run(char **av, char **envp, int *index, int *pipefd)
 			perrexit("malloc", EXIT_FAILURE);
 	}
 	free(line);
-	get_next_line(0, &line);
 	close(pipefd[WRITE]);
+	ft_exit(EXIT_SUCCESS);
 }
 
-void	first_run(char **av, char **envp, int *index, int *pipefd)
+void	child_firstpipe(char **av, char **envp, int *index, int *pipefd)
 {
 	int	infilefd;
 
 	set_cmd_cmdpath(av[index[NOW]]);
-	infilefd = open(av[index[NOW - 1]], O_RDONLY);
+	infilefd = open(av[index[NOW] - 1], O_RDONLY);
 	if (infilefd == -1)
 		perrexit("open", EXIT_FAILURE);
 	if (dup2(infilefd, STDIN_FILENO) == -1)
@@ -69,7 +69,7 @@ void	first_run(char **av, char **envp, int *index, int *pipefd)
 		perrexit("execve", EXIT_FAILURE);
 }
 
-void	middle_run(char **av, char **envp, int *index, int *pipefd)
+void	child_middlepipe(char **av, char **envp, int *index, int *pipefd)
 {
 	set_cmd_cmdpath(av[index[NOW]]);
 	close(pipefd[READ]);
@@ -80,19 +80,21 @@ void	middle_run(char **av, char **envp, int *index, int *pipefd)
 		perrexit("execve", EXIT_FAILURE);
 }
 
-void	last_run(char **av, char **envp, int *index, int *pipefd)
+void	child_lastpipe(char **av, char **envp, int *index, int *pipefd)
 {
 	int	outfilefd;
 
-	set_cmd_cmdpath(av[NOW]);
-	close(pipefd[WRITE]);
-	if (dup2(pipefd[READ], STDIN_FILENO) == -1)
-		perrexit("dup2", EXIT_FAILURE);
+	set_cmd_cmdpath(av[index[NOW]]);
 	close(pipefd[READ]);
+	close(pipefd[WRITE]);
+//	close(pipefd[WRITE]);
+//	if (dup2(pipefd[READ], STDIN_FILENO) == -1)
+//		perrexit("dup2", EXIT_FAILURE);
+//	close(pipefd[READ]);
 	if (index[HERE_DOC])
-		outfilefd = open(av[now + 1], O_RDWR | O_APPEND | O_CREAT, S_IREAD | S_IWRITE);
+		outfilefd = open(av[index[NOW] + 1], O_RDWR | O_APPEND | O_CREAT, S_IREAD | S_IWRITE);
 	else
-		outfilefd = open(av[now + 1], O_RDWR | O_TRUNC | O_CREAT, S_IREAD | S_IWRITE);
+		outfilefd = open(av[index[NOW] + 1], O_RDWR | O_TRUNC | O_CREAT, S_IREAD | S_IWRITE);
 	if (outfilefd == -1)
 		perrexit("open", EXIT_FAILURE);
 	if (dup2(outfilefd, STDOUT_FILENO) == -1)
@@ -102,30 +104,17 @@ void	last_run(char **av, char **envp, int *index, int *pipefd)
 		perrexit("execve", EXIT_FAILURE);
 }
 
-void	child_processes(char **av, char **envp, int *index, int *pipefd)
+void	parent_process(int *status, int *index, int *pipefd)
 {
-	if (index[NOW] == index[START])
-	{
-		if (index[HERE_DOC])
-			here_doc_run(av, envp, index, pipefd);
-		else
-			first_run(av, envp, index, pipefd);
-	}
-	else if (index[START] < index[NOW] && index[NOW] < index[STOP])
-		middle_run(av, envp, index, pipefd);
-	else if (index[NOW] == index[STOP])
-		last_run(av, envp, index, pipefd);
-	else
-		perrexit("index does not meet the conditions", EXIT_FAILURE);
-}
-
-void	parent_process(int *status, int *pipefd)
-{
-	if (waitipid(status) == -1)
+	if (wait(status) == -1)
 		perrexit("wait", EXIT_FAILURE);
 	close(pipefd[WRITE]);
 	dup2(pipefd[READ], STDIN_FILENO);
 	close(pipefd[READ]);
+	if (index[HERE_DOC] == 1)
+		index[HERE_DOC] = 2;
+	else
+		index[NOW]++;
 }
 
 int	execute_loop(char **av, char **envp, int *index)
@@ -142,10 +131,18 @@ int	execute_loop(char **av, char **envp, int *index)
 		if (pid == -1)
 			perrexit("fork", EXIT_FAILURE);
 		if (pid == 0)
-			child_process(av, envp, index, pipefd);
+		{
+			if (index[HERE_DOC] == 1)
+				child_heredoc(av, index, pipefd);
+			else if (index[NOW] == index[START] && index[HERE_DOC] == 0)
+				child_firstpipe(av, envp, index, pipefd);
+			else if (index[NOW] == index[STOP])
+				child_lastpipe(av, envp, index, pipefd);
+			else
+				child_middlepipe(av, envp, index, pipefd);
+		}
 		else
-			parent_process(&status, pipefd);
-		index[NOW]++;
+			parent_process(&status, index,  pipefd);
 	}
 	return (WEXITSTATUS(status));
 }

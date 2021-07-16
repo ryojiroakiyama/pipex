@@ -8,6 +8,7 @@
 # include <sys/types.h>
 # include <sys/stat.h>
 # include "libft.h"
+# include "get_next_line.h"
 # define INVALID_ARGC 1
 # define F_OK_X_OK 0
 # define F_OK_X_NO 126
@@ -50,6 +51,5 @@ void	free_2d_array(char ***array);
 void	free_1d_array(char **array);
 void	ft_exit(int status);
 void	perrexit(const char *s, int status);
-int		get_next_line(int fd, char **line);
 
 #endif

@@ -4,8 +4,8 @@
 # include <stdlib.h>
 # include <unistd.h>
 
-size_t			ft_strlen(char *s);
-ssize_t			ft_strchr(const char *s, int c);
+size_t			gnl_strlen(char *s);
+ssize_t			gnl_strchr(const char *s, int c);
 size_t			ft_strlcpy(char *dst, const char *src, size_t dstsize);
 char			*ft_subnstr(char const *s, unsigned int start, size_t len);
 char			*ft_strnjoin(char const *s1, char const *s2, size_t s2_len);
