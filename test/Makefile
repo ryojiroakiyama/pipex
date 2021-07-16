@@ -25,7 +25,11 @@ ${CP_PIPEX_BONUS}:
 	cp ${PIPEX_BONUS} ${CP_PIPEX_BONUS}
 
 run:
-	./test.sh ${1} "${2}" "${3}" ${4}
+#	./test.sh ${1} "${2}" "${3}" ${4}
+	./test_mandatory.sh
+
+run_bonus:
+	./test_bonus.sh
 
 help:
 	echo "make run 1=infile 2="cat -e" 3="cat -n" 4=outfile"
