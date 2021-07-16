@@ -4,7 +4,7 @@ PIPEX_BONUS = ../pipex_bonus
 
 CP_PIPEX = ./cp_pipex
 
-CP_PIPEX = ./cp_pipex_bonus
+CP_PIPEX_BONUS = ./cp_pipex_bonus
 
 PIPEX_DIR = ../
 
@@ -29,6 +29,7 @@ run:
 
 help:
 	echo "make run 1=infile 2="cat -e" 3="cat -n" 4=outfile"
+
 clean:
 	${MAKE} -C ${PIPEX_DIR} clean
 
