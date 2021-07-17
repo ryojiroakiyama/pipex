@@ -24,15 +24,9 @@ void	first_section(char **av, char **envp);
 void	next_section(char **av, char **envp);
 void	set_path_list(char **envp);
 int		main(int ac, char **av, char **envp);
-/*
-char	*verify_1d_array(char *array, char **to_free1, \
-							char ***to_free2, int status);
-char	**verify_2d_array(char **array, int status);
-*/
 int		verify_access(char *file);
 int		get_cmd_path(char *cmd, int status);
 void	set_cmd_cmdpath(char *av_cmd);
-
 void	free_2d_array(char ***array);
 void	free_1d_array(char **array);
 void	ft_exit(int status);

@@ -54,7 +54,7 @@ void	child_firstpipe(char **av, char **envp, int *index, int *pipefd)
 {
 	int	infilefd;
 
-	set_cmd_cmdpath(av[index[NOW]]);
+//	set_cmd_cmdpath(av[index[NOW]]);
 	infilefd = open(av[index[NOW] - 1], O_RDONLY);
 	if (infilefd == -1)
 		perrexit("open", EXIT_FAILURE);
@@ -65,17 +65,19 @@ void	child_firstpipe(char **av, char **envp, int *index, int *pipefd)
 	if (dup2(pipefd[WRITE], STDOUT_FILENO) == -1)
 		perrexit("dup2", EXIT_FAILURE);
 	close(pipefd[WRITE]);
+	set_cmd_cmdpath(av[index[NOW]]);
 	if (execve(g_cmd_path, g_cmd, envp) == -1)
 		perrexit("execve", EXIT_FAILURE);
 }
 
 void	child_middlepipe(char **av, char **envp, int *index, int *pipefd)
 {
-	set_cmd_cmdpath(av[index[NOW]]);
+//	set_cmd_cmdpath(av[index[NOW]]);
 	close(pipefd[READ]);
 	if (dup2(pipefd[WRITE], STDOUT_FILENO) == -1)
 		perrexit("dup2", EXIT_FAILURE);
 	close(pipefd[WRITE]);
+	set_cmd_cmdpath(av[index[NOW]]);
 	if (execve(g_cmd_path, g_cmd, envp) == -1)
 		perrexit("execve", EXIT_FAILURE);
 }
@@ -84,13 +86,9 @@ void	child_lastpipe(char **av, char **envp, int *index, int *pipefd)
 {
 	int	outfilefd;
 
-	set_cmd_cmdpath(av[index[NOW]]);
+//	set_cmd_cmdpath(av[index[NOW]]);
 	close(pipefd[READ]);
 	close(pipefd[WRITE]);
-//	close(pipefd[WRITE]);
-//	if (dup2(pipefd[READ], STDIN_FILENO) == -1)
-//		perrexit("dup2", EXIT_FAILURE);
-//	close(pipefd[READ]);
 	if (index[HERE_DOC])
 		outfilefd = open(av[index[NOW] + 1], O_RDWR | O_APPEND | O_CREAT, S_IREAD | S_IWRITE);
 	else
@@ -100,6 +98,7 @@ void	child_lastpipe(char **av, char **envp, int *index, int *pipefd)
 	if (dup2(outfilefd, STDOUT_FILENO) == -1)
 		perrexit("dup2", EXIT_FAILURE);
 	close(outfilefd);
+	set_cmd_cmdpath(av[index[NOW]]);
 	if (execve(g_cmd_path, g_cmd, envp) == -1)
 		perrexit("execve", EXIT_FAILURE);
 }

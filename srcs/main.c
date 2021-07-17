@@ -4,7 +4,6 @@ void	first_section(char **av, char **envp)
 {
 	int	infilefd;
 
-	set_cmd_cmdpath(av[2]);
 	infilefd = open(av[1], O_RDONLY);
 	if (infilefd == -1)
 		perrexit("open", EXIT_FAILURE);
@@ -15,6 +14,7 @@ void	first_section(char **av, char **envp)
 	if (dup2(g_pipefd[WRITE], STDOUT_FILENO) == -1)
 		perrexit("dup2", EXIT_FAILURE);
 	close(g_pipefd[WRITE]);
+	set_cmd_cmdpath(av[2]);
 	if (execve(g_cmd_path, g_cmd, envp) == -1)
 		perrexit("execve", EXIT_FAILURE);
 }
@@ -23,7 +23,6 @@ void	next_section(char **av, char **envp)
 {
 	int	outfilefd;
 
-	set_cmd_cmdpath(av[3]);
 	outfilefd = open(av[4], O_RDWR | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
 	if (outfilefd == -1)
 		perrexit("open", EXIT_FAILURE);
@@ -34,6 +33,7 @@ void	next_section(char **av, char **envp)
 	if (dup2(outfilefd, STDOUT_FILENO) == -1)
 		perrexit("dup2", EXIT_FAILURE);
 	close(outfilefd);
+	set_cmd_cmdpath(av[3]);
 	if (execve(g_cmd_path, g_cmd, envp) == -1)
 		perrexit("execve", EXIT_FAILURE);
 }
