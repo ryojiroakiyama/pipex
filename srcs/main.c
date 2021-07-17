@@ -4,8 +4,7 @@ void	first_section(char **av, char **envp)
 {
 	int	infilefd;
 
-//	infilefd = open(av[1], O_RDONLY);
-	infilefd = open(av[1], O_RDONLY | O_NONBLOCK);
+	infilefd = open(av[1], O_RDONLY);
 	if (infilefd == -1)
 		perrexit("open", EXIT_FAILURE);
 	if (dup2(infilefd, STDIN_FILENO) == -1)
