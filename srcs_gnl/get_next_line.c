@@ -64,12 +64,11 @@ int	prepare_mem(int sign, char **line, char **buff)
 	return (sign);
 }
 
-ssize_t	by_buff(char **buff, char **line, char **stock)
+ssize_t	by_buff(char **buff, char **line, char **stock, ssize_t	nl)
 {
-	ssize_t	nl;
 	char	*tmp;
+	size_t	stock_len;
 
-	nl = gnl_strchr(*buff, '\n');
 	if (nl != -1)
 	{
 		tmp = *line;
@@ -77,11 +76,13 @@ ssize_t	by_buff(char **buff, char **line, char **stock)
 		free(tmp);
 		if (!(*line))
 			return (-1);
-		if (gnl_strlen(*buff) - 1 - nl <= 0)
-			return (1);
-		*stock = ft_strnjoin(0, *buff + nl + 1, gnl_strlen(*buff) - 1 - nl);
-		if (!(*stock))
-			return (ft_free(line));
+		stock_len = gnl_strlen(*buff) - 1 - nl;
+		if (stock_len > 0)
+		{
+			*stock = ft_strnjoin(0, *buff + nl + 1, stock_len);
+			if (!(*stock))
+				return (ft_free(line));
+		}
 		return (1);
 	}
 	tmp = *line;
@@ -113,7 +114,7 @@ int	get_next_line(int fd, char **line)
 		else
 		{
 			buff[rc] = '\0';
-			sign = by_buff(&buff, line, &stock);
+			sign = by_buff(&buff, line, &stock, gnl_strchr(buff, '\n'));
 		}
 	}
 	free(buff);
