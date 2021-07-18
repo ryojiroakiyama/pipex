@@ -40,7 +40,10 @@ int	by_stock(char **stock, char **line)
 int	prepare_mem(int sign, char **line, char **buff)
 {
 	if (sign == -1 || sign == 1)
+	{
+		*buff = NULL;
 		return (sign);
+	}
 	if (sign == -42)
 	{
 		*buff = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
@@ -61,14 +64,11 @@ int	prepare_mem(int sign, char **line, char **buff)
 	return (sign);
 }
 
-ssize_t	by_buff(char **buff, char **line, char **stock, ssize_t rc)
+ssize_t	by_buff(char **buff, char **line, char **stock)
 {
 	ssize_t	nl;
 	char	*tmp;
 
-	if (rc == 0)
-		return (0);
-	(*buff)[rc] = '\0';
 	nl = gnl_strchr(*buff, '\n');
 	if (nl != -1)
 	{
@@ -77,6 +77,8 @@ ssize_t	by_buff(char **buff, char **line, char **stock, ssize_t rc)
 		free(tmp);
 		if (!(*line))
 			return (-1);
+		if (gnl_strlen(*buff) - 1 - nl <= 0)
+			return (1);
 		*stock = ft_strnjoin(0, *buff + nl + 1, gnl_strlen(*buff) - 1 - nl);
 		if (!(*stock))
 			return (ft_free(line));
@@ -101,15 +103,18 @@ int	get_next_line(int fd, char **line)
 		return (ft_free(&stock));
 	sign = by_stock(&stock, line);
 	sign = prepare_mem(sign, line, &buff);
-	if (sign == -1 || sign == 1)
-		return (sign);
 	while (sign == 42)
 	{
 		rc = read(fd, buff, BUFFER_SIZE);
 		if (rc == -1)
 			sign = ft_free(line);
+		else if (rc == 0)
+			sign = 0;
 		else
-			sign = by_buff(&buff, line, &stock, rc);
+		{
+			buff[rc] = '\0';
+			sign = by_buff(&buff, line, &stock);
+		}
 	}
 	free(buff);
 	return (sign);
