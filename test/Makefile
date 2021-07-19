@@ -18,10 +18,10 @@ bonus:
 	${MAKE} -C ${PIPEX_DIR} bonus
 	@make ${CP_PIPEX_BONUS}
 
-${CP_PIPEX}:
+${CP_PIPEX}: ${PIPEX}
 	cp ${PIPEX} ${CP_PIPEX}
 
-${CP_PIPEX_BONUS}:
+${CP_PIPEX_BONUS}: ${PIPEX_BONUS}
 	cp ${PIPEX_BONUS} ${CP_PIPEX_BONUS}
 
 run:

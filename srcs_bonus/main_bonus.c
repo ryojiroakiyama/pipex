@@ -32,13 +32,17 @@ void	child_heredoc(char **av, int *index, int *pipefd)
 
 	close(pipefd[READ]);
 	limiter = av[index[NOW] - 1];
-	while (1)//if over byte?
+	ft_putstr_fd("pipe heredoc> ", STDOUT_FILENO);
+	while (1)
 	{
 		status = get_next_line(0, &line);
 		if (ft_strncmp(line, limiter, ft_strlen(limiter) + 1) == 0)
 			break ;
 		if (status == 1)
+		{
 			ft_putendl_fd(line, pipefd[WRITE]);
+			ft_putstr_fd("pipe heredoc> ", STDOUT_FILENO);
+		}
 		if (status == 0)
 			ft_putstr_fd(line, pipefd[WRITE]);
 		free(line);
@@ -54,7 +58,6 @@ void	child_firstpipe(char **av, char **envp, int *index, int *pipefd)
 {
 	int	infilefd;
 
-//	set_cmd_cmdpath(av[index[NOW]]);
 	infilefd = open(av[index[NOW] - 1], O_RDONLY);
 	if (infilefd == -1)
 		perrexit("open", EXIT_FAILURE);
@@ -72,7 +75,6 @@ void	child_firstpipe(char **av, char **envp, int *index, int *pipefd)
 
 void	child_middlepipe(char **av, char **envp, int *index, int *pipefd)
 {
-//	set_cmd_cmdpath(av[index[NOW]]);
 	close(pipefd[READ]);
 	if (dup2(pipefd[WRITE], STDOUT_FILENO) == -1)
 		perrexit("dup2", EXIT_FAILURE);
@@ -86,7 +88,6 @@ void	child_lastpipe(char **av, char **envp, int *index, int *pipefd)
 {
 	int	outfilefd;
 
-//	set_cmd_cmdpath(av[index[NOW]]);
 	close(pipefd[READ]);
 	close(pipefd[WRITE]);
 	if (index[HERE_DOC])
@@ -160,6 +161,8 @@ int	main(int ac, char **av, char **envp)
 	}
 	else
 	{
+		if(ac < 6)
+			ft_exit(INVALID_ARGC);
 		index[START] = 3;
 		index[HERE_DOC] = 1;
 	}
