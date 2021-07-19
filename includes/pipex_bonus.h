@@ -48,7 +48,7 @@ void	child_middlepipe(char **av, char **envp, int *index, int *pipefd);
 void	child_lastpipe(char **av, char **envp, int *index, int *pipefd);
 void	parent_process(int *status, int *index, int *pipefd);
 void	set_path_list(char **envp);
-int		execute_loop(char **av, char **envp, int *index);
+void	execute_loop(char **av, char **envp, int *index, int *status);
 int		main(int ac, char **av, char **envp);
 
 #endif

@@ -3,22 +3,21 @@
 void	child_heredoc(char **av, int *index, int *pipefd)
 {
 	int		status;
-	char 	*line;
+	char	*line;
 	char	*limiter;
 
 	close(pipefd[READ]);
 	limiter = av[index[NOW] - 1];
-	ft_putstr_fd("pipe heredoc> ", STDOUT_FILENO);
+	status = 1;
 	while (1)
 	{
+		if (status == 1)
+			ft_putstr_fd("pipe heredoc> ", STDOUT_FILENO);
 		status = get_next_line(0, &line);
 		if (ft_strncmp(line, limiter, ft_strlen(limiter) + 1) == 0)
 			break ;
 		if (status == 1)
-		{
 			ft_putendl_fd(line, pipefd[WRITE]);
-			ft_putstr_fd("pipe heredoc> ", STDOUT_FILENO);
-		}
 		if (status == 0)
 			ft_putstr_fd(line, pipefd[WRITE]);
 		free(line);
@@ -67,9 +66,11 @@ void	child_lastpipe(char **av, char **envp, int *index, int *pipefd)
 	close(pipefd[READ]);
 	close(pipefd[WRITE]);
 	if (index[HERE_DOC])
-		outfilefd = open(av[index[NOW] + 1], O_RDWR | O_APPEND | O_CREAT, S_IREAD | S_IWRITE);
+		outfilefd = open(av[index[NOW] + 1], \
+							O_RDWR | O_APPEND | O_CREAT, S_IREAD | S_IWRITE);
 	else
-		outfilefd = open(av[index[NOW] + 1], O_RDWR | O_TRUNC | O_CREAT, S_IREAD | S_IWRITE);
+		outfilefd = open(av[index[NOW] + 1], \
+							O_RDWR | O_TRUNC | O_CREAT, S_IREAD | S_IWRITE);
 	if (outfilefd == -1)
 		perrexit("open", EXIT_FAILURE);
 	if (dup2(outfilefd, STDOUT_FILENO) == -1)

@@ -24,11 +24,10 @@ void	set_path_list(char **envp)
 	}
 }
 
-int	execute_loop(char **av, char **envp, int *index)
+void	execute_loop(char **av, char **envp, int *index, int *status)
 {
 	int	pid;
-	int	status;
-	int pipefd[PIPEFD_NUM];
+	int	pipefd[PIPEFD_NUM];
 
 	while (index[NOW] <= index[STOP])
 	{
@@ -49,14 +48,13 @@ int	execute_loop(char **av, char **envp, int *index)
 				child_middlepipe(av, envp, index, pipefd);
 		}
 		else
-			parent_process(&status, index,  pipefd);
+			parent_process(status, index, pipefd);
 	}
-	return (WEXITSTATUS(status));
 }
 
 int	main(int ac, char **av, char **envp)
 {
-	int	last_status;
+	int	status;
 	int	index[INDEX_NUM];
 
 	if (ac < 5)
@@ -68,7 +66,7 @@ int	main(int ac, char **av, char **envp)
 	}
 	else
 	{
-		if(ac < 6)
+		if (ac < 6)
 			ft_exit(INVALID_ARGC);
 		index[START] = 3;
 		index[HERE_DOC] = 1;
@@ -76,9 +74,9 @@ int	main(int ac, char **av, char **envp)
 	index[STOP] = ac - 2;
 	index[NOW] = index[START];
 	set_path_list(envp);
-	last_status = execute_loop(av, envp, index);
+	execute_loop(av, envp, index, &status);
 	free_2d_array(&g_path_list);
 	free_2d_array(&g_cmd);
 	free_1d_array(&g_cmd_path);
-	return (last_status);
+	return (WEXITSTATUS(status));
 }
