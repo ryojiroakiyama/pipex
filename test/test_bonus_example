@@ -1,0 +1,21 @@
+#infile outfile not exist
+rm outfile
+./cp_pipex_bonus infile "cat" "cat -e" "grep if" "cat -n" outfile
+./cp_pipex_bonus infilee "cat" "cat -e" "grep if" "cat -n" outfile
+
+#invalid number of argment
+./cp_pipex_bonus here_doc LIMITER "cat" cat
+
+#normal
+./cp_pipex_bonus infile "cat -e" "cat -n" outfile
+./cp_pipex_bonus infile "cat" "cat -e" "grep if" "cat -n" outfile
+./cp_pipex_bonus here_doc LIMITER "cat" "cat -e" "grep if" "cat -n" outfile
+
+#command not exist
+./cp_pipex_bonus infile "cat" "ca -e" "grep if" "echo aaa" outfile
+
+#no execute authority
+./cp_pipex_bonus infile "cat" "ca -e" "./noauth_execfile" "grep ii" "echo aaa" "cat -e" outfile
+
+#env==NULL
+env -i ./cp_pipex_bonus here_doc LIMITER "cat" "cat -e" "grep if" "cat -n" outfile

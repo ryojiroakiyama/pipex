@@ -13,8 +13,8 @@ rm outfile
 ./for_test_mandatory.sh infile "cat" "ca" outfile
 
 #no execute authority
-./for_test_mandatory.sh infile "./no_exec_authority" "wc -l" outfile
-./for_test_mandatory.sh infile "cat" "./no_exec_authority" outfile
+./for_test_mandatory.sh infile "./noauth_execfile" "wc -l" outfile
+./for_test_mandatory.sh infile "cat" "./noauth_execfile" outfile
 
 #option not exist
 ./for_test_mandatory.sh infile "cat" "wc -s" outfile
@@ -23,7 +23,7 @@ rm outfile
 ./for_test_mandatory.sh infile not_executable_file ls outfile
 
 #big file
-./for_test_mandatory.sh big_file "cat -e" "cat -n" outfile
+#./for_test_mandatory.sh ./other_utils/big_file "cat -e" "cat -n" outfile
 
 #env==NULL
 echo "==>start<=="
