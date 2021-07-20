@@ -89,7 +89,9 @@ int	main(int ac, char **av, char **envp)
 			perrexit("pipe", EXIT_FAILURE);
 		close(g_pipefd[READ]);
 		g_pipefd[READ] = prev_fd;
+		write(2, "y", 1);
 		pid = fork();
+		write(2, "z", 1);
 		if (pid == -1)
 			perrexit("fork", EXIT_FAILURE);
 		else if (pid == 0)
