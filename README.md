@@ -13,4 +13,5 @@ make bonus
 ![image](https://user-images.githubusercontent.com/77039327/128193884-422cf369-328b-4789-8c3a-05d4f70215b5.png)
 
 - here document flow diagram of this program
-![image](https://user-images.githubusercontent.com/77039327/128193915-6be86ae2-7843-4664-987b-8bf1ed52dac7.png)
+![image](https://user-images.githubusercontent.com/77039327/128195253-e85b40c2-8db9-4c5b-aa00-52104f73bff0.png)
+
