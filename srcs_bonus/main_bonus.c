@@ -56,6 +56,7 @@ int	main(int ac, char **av, char **envp)
 {
 	int	status;
 	int	index[INDEX_NUM];
+	int child_cnt;//
 
 	if (ac < 5)
 		ft_exit(INVALID_ARGC);
@@ -63,6 +64,7 @@ int	main(int ac, char **av, char **envp)
 	{
 		index[START] = 2;
 		index[HERE_DOC] = 0;
+		child_cnt = ac - 3;//
 	}
 	else
 	{
@@ -70,11 +72,14 @@ int	main(int ac, char **av, char **envp)
 			ft_exit(INVALID_ARGC);
 		index[START] = 3;
 		index[HERE_DOC] = 1;
+		child_cnt = ac - 4;//
 	}
 	index[STOP] = ac - 2;
 	index[NOW] = index[START];
 	set_path_list(envp);
 	execute_loop(av, envp, index, &status);
+	while (child_cnt--)//
+		wait(NULL);//
 	free_2d_array(&g_path_list);
 	free_2d_array(&g_cmd);
 	free_1d_array(&g_cmd_path);

@@ -83,8 +83,9 @@ void	child_lastpipe(char **av, char **envp, int *index, int *pipefd)
 
 void	parent_process(int *status, int *index, int *pipefd)
 {
-	if (wait(status) == -1)
-		perrexit("wait", EXIT_FAILURE);
+	(void)status;
+//	if (wait(status) == -1)
+//		perrexit("wait", EXIT_FAILURE);
 	close(pipefd[WRITE]);
 	dup2(pipefd[READ], STDIN_FILENO);
 	close(pipefd[READ]);

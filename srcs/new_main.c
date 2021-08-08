@@ -78,7 +78,7 @@ int	main(int ac, char **av, char **envp)
 		perrexit("fork", EXIT_FAILURE);
 	else if (pid == 0)
 	{
-		write(2, "b", 1);
+//		write(2, "b", 1);
 		first_section(av, envp);
 	}
 	else
@@ -89,21 +89,21 @@ int	main(int ac, char **av, char **envp)
 //			perrexit("pipe", EXIT_FAILURE);
 //		close(g_pipefd[READ]);
 //		g_pipefd[READ] = prev_fd;
-		write(2, "y", 1);
+//		write(2, "y", 1);
 		pid = fork();
-		write(2, "z", 1);
+//		write(2, "z", 1);
 		if (pid == -1)
 			perrexit("fork", EXIT_FAILURE);
 		else if (pid == 0)
 		{
-			write(2, "c", 1);
+//			write(2, "c", 1);
 			next_section(av, envp);
 		}
 		else
 		{
 //			close(g_pipefd[WRITE]);
 //			close(g_pipefd[READ]);
-			write(2, "a", 1);
+//			write(2, "a", 1);
 			if (wait(&status) == -1)
 				perrexit("wait", EXIT_FAILURE);
 		}
