@@ -2,7 +2,7 @@ PIPEX = pipex
 
 PIPEX_BONUS = pipex_bonus
 
-SRCS = ./srcs/new_main.c ./srcs/prepare_command.c ./srcs/free_exit_funcs.c #./srcs/main.c 
+SRCS = ./srcs/main.c ./srcs/prepare_command.c ./srcs/free_exit_funcs.c #./srcs/new_main.c 
 
 SRCS_BONUS = ./srcs_bonus/main_bonus.c ./srcs_bonus/prepare_command_bonus.c ./srcs_bonus/free_exit_funcs_bonus.c ./srcs_bonus/parent_and_child_func_bonus.c ./srcs_gnl/get_next_line_bonus.c ./srcs_gnl/get_next_line_utils_bonus.c
 
